@@ -2,13 +2,452 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
 <title>Tomato Planner</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Jua',sans-serif;
+}
+
+body{
+background:#f5f5f5;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.widget{
+
+width:1200px;
+height:500px;
+
+display:flex;
+gap:40px;
+
+background:#fff;
+
+padding:40px;
+
+border-radius:40px;
+
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+
+}
+
+/* 토마토 */
+
+.tomato{
+
+width:380px;
+height:380px;
+
+background:#ef5b4c;
+
+border:10px solid #2d5168;
+
+border-radius:50%;
+
+position:relative;
+
+box-shadow:
+12px 12px 0 #c74c3f;
+
+flex-shrink:0;
+
+}
+
+.leaf{
+
+position:absolute;
+top:-30px;
+left:50%;
+transform:translateX(-50%);
+
+width:120px;
+height:80px;
+}
+
+.leaf::before,
+.leaf::after{
+
+content:"";
+
+position:absolute;
+
+width:60px;
+height:60px;
+
+background:#78b0a8;
+
+border:8px solid #2d5168;
+
+border-radius:50px;
+
+}
+
+.leaf::before{
+left:0;
+transform:rotate(-35deg);
+}
+
+.leaf::after{
+right:0;
+transform:rotate(35deg);
+}
+
+.shine{
+
+position:absolute;
+
+left:30px;
+top:70px;
+
+width:50px;
+height:130px;
+
+background:rgba(255,255,255,.2);
+
+border-radius:50px;
+
+transform:rotate(-20deg);
+
+}
+
+.date-box{
+
+position:absolute;
+
+top:55px;
+left:50%;
+
+transform:translateX(-50%);
+
+width:250px;
+height:70px;
+
+background:white;
+
+border:8px solid #2d5168;
+
+display:flex;
+
+justify-content:center;
+align-items:center;
+
+font-size:22px;
+color:#2d5168;
+
+}
+
+.time-box{
+
+position:absolute;
+
+left:50%;
+top:160px;
+
+transform:translateX(-50%);
+
+width:290px;
+height:140px;
+
+background:white;
+
+border:8px solid #2d5168;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+
+}
+
+#time{
+
+font-size:64px;
+color:#2d5168;
+
+}
+
+#ampm{
+
+font-size:28px;
+color:#2d5168;
+}
+
+/* 오른쪽 */
+
+.panel{
+
+flex:1;
+
+display:flex;
+flex-direction:column;
+
+}
+
+.title{
+
+font-size:50px;
+color:#2d5168;
+
+margin-bottom:10px;
+
+}
+
+.today{
+
+font-size:26px;
+color:#666;
+
+margin-bottom:25px;
+
+}
+
+.progress{
+
+font-size:28px;
+color:#ef5b4c;
+
+margin-bottom:20px;
+
+}
+
+.task-list{
+
+flex:1;
+overflow:auto;
+
+}
+
+.task{
+
+display:flex;
+align-items:center;
+gap:12px;
+
+margin-bottom:15px;
+
+font-size:28px;
+}
+
+.task input{
+
+width:24px;
+height:24px;
+
+}
+
+.add-area{
+
+display:flex;
+gap:10px;
+}
+
+#taskInput{
+
+flex:1;
+
+padding:15px;
+
+font-size:24px;
+
+border-radius:15px;
+
+border:3px solid #ddd;
+
+}
+
+button{
+
+padding:15px 25px;
+
+font-size:24px;
+
+border:none;
+
+border-radius:15px;
+
+background:#ef5b4c;
+
+color:white;
+
+cursor:pointer;
+
+}
+
+</style>
 </head>
 <body>
 
-<h1>🍅 Tomato Planner</h1>
+<div class="widget">
 
-<p>연결 성공!</p>
+<div class="tomato">
+
+<div class="leaf"></div>
+
+<div class="shine"></div>
+
+<div class="date-box" id="date"></div>
+
+<div class="time-box">
+
+<div id="time"></div>
+
+<div id="ampm"></div>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="title">TODAY TASKS 🍅</div>
+
+<div class="today" id="todayDate"></div>
+
+<div class="progress" id="progress">진행률 0%</div>
+
+<div class="task-list" id="taskList"></div>
+
+<div class="add-area">
+
+<input id="taskInput" placeholder="할 일을 입력하세요">
+
+<button onclick="addTask()">+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function updateClock(){
+
+const now=new Date();
+
+document.getElementById('date').innerText=
+now.getFullYear()+'.'+
+String(now.getMonth()+1).padStart(2,'0')+'.'+
+String(now.getDate()).padStart(2,'0');
+
+let hour=now.getHours();
+
+const ampm=hour>=12?'PM':'AM';
+
+hour=hour%12;
+hour=hour||12;
+
+document.getElementById('time').innerText=
+String(hour).padStart(2,'0')+':'+
+String(now.getMinutes()).padStart(2,'0');
+
+document.getElementById('ampm').innerText=ampm;
+
+document.getElementById('todayDate').innerText=
+now.toLocaleDateString('ko-KR');
+
+}
+
+setInterval(updateClock,1000);
+updateClock();
+
+let tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
+
+function save(){
+
+localStorage.setItem(
+'tasks',
+JSON.stringify(tasks)
+);
+
+render();
+
+}
+
+function addTask(){
+
+const input=
+document.getElementById('taskInput');
+
+if(!input.value.trim()) return;
+
+tasks.push({
+text:input.value,
+done:false
+});
+
+input.value='';
+
+save();
+
+}
+
+function render(){
+
+const list=
+document.getElementById('taskList');
+
+list.innerHTML='';
+
+let done=0;
+
+tasks.forEach((task,index)=>{
+
+if(task.done) done++;
+
+list.innerHTML+=`
+<div class="task">
+<input type="checkbox"
+${task.done?'checked':''}
+onchange="toggleTask(${index})">
+
+<span>${task.text}</span>
+
+<button onclick="deleteTask(${index})">삭제</button>
+</div>
+`;
+
+});
+
+const percent=
+tasks.length
+?Math.round(done/tasks.length*100)
+:0;
+
+document.getElementById('progress')
+.innerText=`진행률 ${percent}%`;
+
+}
+
+function toggleTask(i){
+
+tasks[i].done=!tasks[i].done;
+save();
+
+}
+
+function deleteTask(i){
+
+tasks.splice(i,1);
+save();
+
+}
+
+render();
+
+</script>
 
 </body>
 </html>
